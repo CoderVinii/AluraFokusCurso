@@ -7,8 +7,11 @@ const ulTarefas = document.querySelector('.app__section-task-list')
 const btnCancelar = document.querySelector('.app__form-footer__button--cancel');
 const paragrafoDescricaoTarefa = document.querySelector('.app__section-active-task-description')
 
-const tarefas = JSON.parse(localStorage.getItem('tarefas')) || []
+const btnRemoverConcluidas = document.querySelector('#btn-remover-concluidas')
+
+let tarefas = JSON.parse(localStorage.getItem('tarefas')) || []
 let tarefaSelecionada = null 
+let LiTarefaSelecionada = null
 
 function atualizarTarefas () {
     localStorage.setItem('tarefas', JSON.stringify(tarefas))
@@ -38,11 +41,12 @@ function criarElementoTarefa(tarefa) {
       //debugger
       const novaDescricao = prompt("Qual é o novo nome da tarefa?")
       //console.log('Nova descrição da tarefa: ', novaDescricao)
-      if (novaDescricao) {
+        if (novaDescricao) {
           paragrafo.textContent = novaDescricao
-      tarefa.descricao = novaDescricao
-      atualizarTarefas()
-      }
+          tarefa.descricao = novaDescricao
+          atualizarTarefas()
+
+        }
    }
 
    const imagemBotao = document.createElement('img')
@@ -53,19 +57,26 @@ function criarElementoTarefa(tarefa) {
    li.append(paragrafo)
    li.append(botao)
 
-   li.onclick = () => {
+   if (tarefa.completa) {
+      li.classList.add('app__section-task-list-item-complete')
+      botao.setAttribute('disabled', 'disable')
+   } else {
+      li.onclick = () => {
+    document.querySelectorAll('.app__section-task-list-item-active')
+        .forEach(elemento => {
+           elemento.classList.remove('app__section-task-list-item-active')
+        })
     if (tarefaSelecionada == tarefa) {
-       paragrafoDescricaoTarefa.textContent = ''
-       tarefaSelecionada = null
-       return
+        paragrafoDescricaoTarefa.textContent = ''
+        tarefaSelecionada = null
+        return
     }
     tarefaSelecionada = tarefa
+    LiTarefaSelecionada = li
     paragrafoDescricaoTarefa.textContent = tarefa.descricao
-    document.querySelectorAll('.app__section-task-list-item-active')
-    .forEach(elemento => {
-        elemento.classList.remove('app__section-task-list-item-active')
-    })
+
     li.classList.add('app__section-task-list-item-active')
+      }
    }
 
    return li
@@ -99,3 +110,28 @@ function limparFormulario() {
 }
 
 btnCancelar.addEventListener('click', limparFormulario);
+
+document.addEventListener('FocoFinalizado', () => {
+    if (tarefaSelecionada && LiTarefaSelecionada) {
+        LiTarefaSelecionada.classList.remove('app__section-task-list-item-active')
+        LiTarefaSelecionada.classList.add('app__section-task-list-item-complete')
+        LiTarefaSelecionada.querySelector('button').setAttribute('disabled', 'disable')
+        tarefaSelecionada.completa = true 
+        atualizarTarefas()
+    }
+})
+
+const removerTarefas = (somenteCompletas) => {
+    const seletor = somenteCompletas ? ".app__section-task-list-item-complete" : ".app__section-task-list-item"
+    //let seletor = ".app__section-task-list-item"
+    //if (somenteCompletas) {
+    //    seletor = ".app__section-task-list-item-complete"
+    // }
+    document.querySelectorAll(seletor).forEach(elemento => {
+        elemento.remove()
+    })
+    tarefas = somenteCompletas ? tarefas.filter(tarefa => !tarefa.completa) : []
+    atualizarTarefas()
+}
+
+btnRemoverConcluidas.onclick = () => removerTarefas(true)
