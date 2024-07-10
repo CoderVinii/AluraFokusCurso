@@ -7,6 +7,7 @@ const ulTarefas = document.querySelector('.app__section-task-list')
 const btnCancelar = document.querySelector('.app__form-footer__button--cancel');
 const paragrafoDescricaoTarefa = document.querySelector('.app__section-active-task-description')
 
+const btnRemoverTodas = document.querySelector('#btn-remover-todas')
 const btnRemoverConcluidas = document.querySelector('#btn-remover-concluidas')
 
 let tarefas = JSON.parse(localStorage.getItem('tarefas')) || []
@@ -135,3 +136,4 @@ const removerTarefas = (somenteCompletas) => {
 }
 
 btnRemoverConcluidas.onclick = () => removerTarefas(true)
+btnRemoverTodas.onclick = () => removerTarefas(false)
